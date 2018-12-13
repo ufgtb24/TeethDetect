@@ -7,6 +7,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TeethDetect", "TeethDetect\
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "test_tensorflow_c", "test_tensorflow_c\test_tensorflow_c.vcxproj", "{82910557-FAA8-471E-87B0-1E78B611D8A7}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "test", "test\test.vcxproj", "{459014C4-2D57-49F0-AC96-484D17D74F13}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -31,6 +33,14 @@ Global
 		{82910557-FAA8-471E-87B0-1E78B611D8A7}.Release|x64.Build.0 = Release|x64
 		{82910557-FAA8-471E-87B0-1E78B611D8A7}.Release|x86.ActiveCfg = Release|Win32
 		{82910557-FAA8-471E-87B0-1E78B611D8A7}.Release|x86.Build.0 = Release|Win32
+		{459014C4-2D57-49F0-AC96-484D17D74F13}.Debug|x64.ActiveCfg = Debug|x64
+		{459014C4-2D57-49F0-AC96-484D17D74F13}.Debug|x64.Build.0 = Debug|x64
+		{459014C4-2D57-49F0-AC96-484D17D74F13}.Debug|x86.ActiveCfg = Debug|Win32
+		{459014C4-2D57-49F0-AC96-484D17D74F13}.Debug|x86.Build.0 = Debug|Win32
+		{459014C4-2D57-49F0-AC96-484D17D74F13}.Release|x64.ActiveCfg = Release|x64
+		{459014C4-2D57-49F0-AC96-484D17D74F13}.Release|x64.Build.0 = Release|x64
+		{459014C4-2D57-49F0-AC96-484D17D74F13}.Release|x86.ActiveCfg = Release|Win32
+		{459014C4-2D57-49F0-AC96-484D17D74F13}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

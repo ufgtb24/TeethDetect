@@ -11,32 +11,35 @@
 #endif
 
 #include <vector>
-using namespace std;
+#include <memory>
 namespace tensorflow {
 	class Tensor;
 	class Session;
 	class Status;
 	class Env;
 }
+using namespace std;
+using namespace tensorflow;
 // class Tensor;
 // class Session;
 // class Status;
 
 // This class is exported from the TeethDetect.dll
-class TEETHDETECT_API CTeethDetect {
+class TEETHDETECT_API TeethDetect {
 public:
-	CTeethDetect(void);
+	TeethDetect(string graph_path);
 	// TODO: add your methods here.
+	int detect(string image_path);
+private:
+	unique_ptr<Session> session;
 
-	tensorflow::Status ReadTensorFromImageFile(const string& file_name, const int input_height,
-		const int input_width, const float input_mean,
-		const float input_std,
-		vector<tensorflow::Tensor>* out_tensors);
+	Status ReadTensorFromImageFile(const string& file_name, const int input_height,
+		const int input_width, const float input_std,
+		vector<Tensor>* out_tensors);
 
-	tensorflow::Status ReadEntireFile(tensorflow::Env* env, const string& filename, tensorflow::Tensor* output);
+	Status ReadEntireFile(Env* env, const string& filename, Tensor* output);
+	Status TeethDetect::LoadGraph(const string& graph_file_name,
+		unique_ptr<tensorflow::Session>* session);
 
 };
 
-extern TEETHDETECT_API int nTeethDetect;
-
-TEETHDETECT_API int fnTeethDetect(void);

@@ -1,78 +1,72 @@
 // TeethDetect.cpp : Defines the exported functions for the DLL application.
 //
 
-#define COMPILER_MSVC
-#define NOMINMAX
 
-// #include "stdafx.h"
-#include "TeethDetect.h"
-
-#include <string>
-#include "tensorflow/cc/ops/const_op.h"
-#include "tensorflow/cc/ops/image_ops.h"
-#include "tensorflow/cc/ops/standard_ops.h"
-#include "tensorflow/core/framework/graph.pb.h"
-#include "tensorflow/core/graph/default_device.h"
-#include "tensorflow/core/graph/graph_def_builder.h"
-#include "tensorflow/core/lib/core/errors.h"
-#include "tensorflow/core/lib/core/stringpiece.h"
-#include "tensorflow/core/lib/core/threadpool.h"
-#include "tensorflow/core/lib/io/path.h"
-#include "tensorflow/core/lib/strings/stringprintf.h"
-#include "tensorflow/core/platform/init_main.h"
-#include "tensorflow/core/platform/logging.h"
-#include "tensorflow/core/platform/types.h"
-#include "tensorflow/core/public/session.h"
-#include "tensorflow/core/util/command_line_flags.h"
-#include "tensorflow/core/platform/env.h"
-#include "tensorflow/core/framework/tensor.h"
-
-// #include "tensorflow/core/public/session.h"
-// #include  "tensorflow/c/c_api.h"
-// #include "tensorflow/c/c_api_internal.h"
-// #include "tensorflow/cc/ops/array_ops.h"
-// #include "tensorflow/cc/ops/const_op.h"
-// #include "tensorflow/cc/ops/image_ops.h"
-// #include "tensorflow/cc/ops/standard_ops.h"
-// #include "tensorflow/core/framework/graph.pb.h"
-// #include "tensorflow/core/framework/tensor.h"
-// #include "tensorflow/core/graph/default_device.h"
-// #include "tensorflow/core/graph/graph_def_builder.h"
-// #include "tensorflow/core/lib/core/errors.h"
-// #include "tensorflow/core/lib/core/stringpiece.h"
-// #include "tensorflow/core/lib/core/threadpool.h"
-// #include "tensorflow/core/lib/io/path.h"
-// #include "tensorflow/core/lib/strings/stringprintf.h"
-// #include "tensorflow/core/platform/env.h"
-// #include "tensorflow/core/platform/init_main.h"
-// #include "tensorflow/core/platform/logging.h"
-// // #include "tensorflow/core/platform/types.h"
-// // #include "tensorflow/core/platform/default/integral_types.h"
-// #include "tensorflow/core/util/command_line_flags.h"
-
-
-using namespace std;
-using namespace tensorflow;
+#include "stdafx.h"
 // This is an example of an exported variable
-TEETHDETECT_API int nTeethDetect=0;
-
-// This is an example of an exported function.
-TEETHDETECT_API int fnTeethDetect(void)
-{
-    return 42;
-}
 
 // This is the constructor of a class that has been exported.
 // see TeethDetect.h for the class definition
-CTeethDetect::CTeethDetect()
+TeethDetect::TeethDetect(string graph_path)
 {
+	Status load_graph_status = LoadGraph(graph_path, &session);
+	if (!load_graph_status.ok()) {
+		LOG(ERROR) << load_graph_status;
+	}
+
     return;
 }
 
-Status CTeethDetect::ReadTensorFromImageFile(const string& file_name, const int input_height,
-	const int input_width, const float input_mean,
-	const float input_std,
-	std::vector<Tensor>* out_tensors) {
+int TeethDetect::detect(string image_path)
+{
+	string input_layer = "input";
+	string output_layer = "LeftTop_RightBottom";
+	std::vector<Tensor> resized_tensors;
+	Status read_tensor_status =
+		ReadTensorFromImageFile(image_path, 416, 416,
+			255, &resized_tensors);
+	if (!read_tensor_status.ok()) {
+		LOG(ERROR) << read_tensor_status;
+		return -1;
+	}
+
+	// define feed value for resized image 
+	const Tensor& resized_tensor = resized_tensors[0];
+	const Tensor& ori_size = resized_tensors[1];
+	auto ori_size_value = ori_size.tensor<int, 1>();
+	cout <<"ori_size: "<< ori_size_value(0) << "   " << ori_size_value(1) << endl;
+
+	// define feed value for phase
+	Tensor is_training(DT_BOOL, TensorShape());
+	is_training.scalar<bool>()() = false;
+
+	// define feed value for original image size
+	Tensor image_shape(DT_FLOAT, TensorShape({2}));
+	auto t_vec = image_shape.vec<float>();
+	t_vec(0) = ori_size_value(0);
+	t_vec(1) = ori_size_value(1);
+
+
+	// Actually run the image through the model.
+	std::vector<Tensor> outputs;
+	Status run_status = session->Run({ 
+		{ input_layer, resized_tensor },{ "phase", is_training },{ "image_shape",image_shape } },
+	{ output_layer }, {}, &outputs);
+
+	if (!run_status.ok()) {
+		LOG(ERROR) << "Running model failed: " << run_status;
+		return -1;
+	}
+	else {
+		const TensorShape& output_shape = outputs[0].shape();
+		int num_box = output_shape.dim_size(0);
+
+		cout <<"num_box = "<< num_box<<endl;
+	}
+}
+
+Status TeethDetect::ReadTensorFromImageFile(const string& file_name, const int input_height,
+	const int input_width, const float input_std,std::vector<Tensor>* out_tensors) {
 	auto root = tensorflow::Scope::NewRootScope();
 	using namespace ::tensorflow::ops;  // NOLINT(build/namespaces)
 
@@ -112,6 +106,12 @@ Status CTeethDetect::ReadTensorFromImageFile(const string& file_name, const int 
 		image_reader = DecodeJpeg(root.WithOpName("jpeg_reader"), file_reader,
 			DecodeJpeg::Channels(wanted_channels));
 	}
+
+
+
+
+	auto get_shape = Shape(root.WithOpName("get_shape"), image_reader);
+
 	// Now cast the image data to float so we can do normal math on it.
 	auto float_caster =
 		Cast(root.WithOpName("float_caster"), image_reader, tensorflow::DT_FLOAT);
@@ -120,27 +120,29 @@ Status CTeethDetect::ReadTensorFromImageFile(const string& file_name, const int 
 	// [batch, height, width, channel]. Because we only have a single image, we
 	// have to add a batch dimension of 1 to the start with ExpandDims().
 	auto dims_expander = ExpandDims(root, float_caster, 0);
+
 	// Bilinearly resize the image to fit the required dimensions.
 	auto resized = ResizeBilinear(
 		root, dims_expander,
 		Const(root.WithOpName("size"), { input_height, input_width }));
 	// Subtract the mean and divide by the scale.
-	Div(root.WithOpName(output_name), Sub(root, resized, { input_mean }),
-	{ input_std });
+	Div(root.WithOpName(output_name), resized,{ input_std });
 
 	// This runs the GraphDef network definition that we've just constructed, and
 	// returns the results in the output tensor.
 	tensorflow::GraphDef graph;
+
 	TF_RETURN_IF_ERROR(root.ToGraphDef(&graph));
+
 
 	std::unique_ptr<tensorflow::Session> session(
 		tensorflow::NewSession(tensorflow::SessionOptions()));
 	TF_RETURN_IF_ERROR(session->Create(graph));
-	TF_RETURN_IF_ERROR(session->Run({ inputs }, { output_name }, {}, out_tensors));
+	TF_RETURN_IF_ERROR(session->Run({ inputs }, { output_name,"get_shape" }, {}, out_tensors));
 	return Status::OK();
 }
 
-Status CTeethDetect::ReadEntireFile(tensorflow::Env* env, const string& filename,
+Status TeethDetect::ReadEntireFile(tensorflow::Env* env, const string& filename,
 	Tensor* output) {
 	tensorflow::uint64 file_size = 0;
 	TF_RETURN_IF_ERROR(env->GetFileSize(filename, &file_size));
@@ -161,4 +163,22 @@ Status CTeethDetect::ReadEntireFile(tensorflow::Env* env, const string& filename
 	output->scalar<string>()() = data.ToString();
 	return Status::OK();
 }
+
+Status TeethDetect::LoadGraph(const string& graph_file_name,
+	unique_ptr<tensorflow::Session>* session) {
+	tensorflow::GraphDef graph_def;
+	Status load_graph_status =
+		ReadBinaryProto(tensorflow::Env::Default(), graph_file_name, &graph_def);
+	if (!load_graph_status.ok()) {
+		return tensorflow::errors::NotFound("Failed to load compute graph at '",
+			graph_file_name, "'");
+	}
+	session->reset(tensorflow::NewSession(tensorflow::SessionOptions()));
+	Status session_create_status = (*session)->Create(graph_def);
+	if (!session_create_status.ok()) {
+		return session_create_status;
+	}
+	return Status::OK();
+}
+
 
