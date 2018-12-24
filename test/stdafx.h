@@ -10,6 +10,7 @@
 #include <stdio.h>
 #include <tchar.h>
 #include "TeethDetect.h"
-
+#include <iostream>
+using namespace std;
 
 // TODO: reference additional headers your program requires here

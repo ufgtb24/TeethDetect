@@ -29,7 +29,7 @@ class TEETHDETECT_API TeethDetect {
 public:
 	TeethDetect(string graph_path);
 	// TODO: add your methods here.
-	int detect(string image_path);
+	int detect(string image_path, int& num_box, float** coord,int& width, int& height);
 private:
 	unique_ptr<Session> session;
 

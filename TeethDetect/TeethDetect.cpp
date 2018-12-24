@@ -17,7 +17,7 @@ TeethDetect::TeethDetect(string graph_path)
     return;
 }
 
-int TeethDetect::detect(string image_path)
+int TeethDetect::detect(string image_path, int& num_box, float** coord, int& width, int& height)
 {
 	string input_layer = "input";
 	string output_layer = "LeftTop_RightBottom";
@@ -45,8 +45,8 @@ int TeethDetect::detect(string image_path)
 	auto t_vec = image_shape.vec<float>();
 	t_vec(0) = ori_size_value(0);
 	t_vec(1) = ori_size_value(1);
-
-
+	width = ori_size_value(0);
+	height= ori_size_value(1);
 	// Actually run the image through the model.
 	std::vector<Tensor> outputs;
 	Status run_status = session->Run({ 
@@ -59,9 +59,18 @@ int TeethDetect::detect(string image_path)
 	}
 	else {
 		const TensorShape& output_shape = outputs[0].shape();
-		int num_box = output_shape.dim_size(0);
+		num_box = output_shape.dim_size(0);
+		cout <<"num_box = "<< num_box <<endl;
+		auto output_detection_boxes = outputs[0].tensor<float, 2>();
 
-		cout <<"num_box = "<< num_box<<endl;
+		for (int i = 0; i < num_box; i++) {
+			for (int j = 0; j < 4; j++) {
+				coord[i][j] = output_detection_boxes(i,j);
+// 				cout << coord[i][j] << "\t";
+			}
+// 			cout << endl;
+		}
+
 	}
 }
 
