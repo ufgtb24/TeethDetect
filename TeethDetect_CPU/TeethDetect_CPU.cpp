@@ -7,26 +7,30 @@
 
 // This is the constructor of a class that has been exported.
 // see TeethDetect.h for the class definition
-TeethDetect::TeethDetect(string graph_path)
+TeethDetect_CPU::TeethDetect_CPU(string graph_path)
 {
 	Status load_graph_status = LoadGraph(graph_path, &session);
 	if (!load_graph_status.ok()) {
+		LOG(ERROR) << "!!!!!!!!!!!!!!!\n";
 		LOG(ERROR) << load_graph_status;
+		LOG(ERROR) << "!!!!!!!!!!!!!!!\n";
 	}
 
     return;
 }
 
-int TeethDetect::detect(string image_path, int& num_box, float** coord, int& width, int& height)
+int TeethDetect_CPU::detect(string image_path, int& num_box, float** coord, int& width, int& height)
 {
 	string input_layer = "input";
-	string output_layer = "LeftTop_RightBottom";
+	string output_layer = "output_node";
 	std::vector<Tensor> resized_tensors;
 	Status read_tensor_status =
 		ReadTensorFromImageFile(image_path, 416, 416,
 			255, &resized_tensors);
 	if (!read_tensor_status.ok()) {
+		LOG(ERROR) << "!!!!!!!!!!!!!!!\n";
 		LOG(ERROR) << read_tensor_status;
+		LOG(ERROR) << "!!!!!!!!!!!!!!!\n";
 		return -1;
 	}
 
@@ -54,7 +58,9 @@ int TeethDetect::detect(string image_path, int& num_box, float** coord, int& wid
 	{ output_layer }, {}, &outputs);
 
 	if (!run_status.ok()) {
+		LOG(ERROR) << "!!!!!!!!!!!!!!!\n";
 		LOG(ERROR) << "Running model failed: " << run_status;
+		LOG(ERROR) << "!!!!!!!!!!!!!!!\n";
 		return -1;
 	}
 	else {
@@ -74,7 +80,7 @@ int TeethDetect::detect(string image_path, int& num_box, float** coord, int& wid
 	}
 }
 
-Status TeethDetect::ReadTensorFromImageFile(const string& file_name, const int input_height,
+Status TeethDetect_CPU::ReadTensorFromImageFile(const string& file_name, const int input_height,
 	const int input_width, const float input_std,std::vector<Tensor>* out_tensors) {
 	auto root = tensorflow::Scope::NewRootScope();
 	using namespace ::tensorflow::ops;  // NOLINT(build/namespaces)
@@ -151,7 +157,7 @@ Status TeethDetect::ReadTensorFromImageFile(const string& file_name, const int i
 	return Status::OK();
 }
 
-Status TeethDetect::ReadEntireFile(tensorflow::Env* env, const string& filename,
+Status TeethDetect_CPU::ReadEntireFile(tensorflow::Env* env, const string& filename,
 	Tensor* output) {
 	tensorflow::uint64 file_size = 0;
 	TF_RETURN_IF_ERROR(env->GetFileSize(filename, &file_size));
@@ -173,7 +179,7 @@ Status TeethDetect::ReadEntireFile(tensorflow::Env* env, const string& filename,
 	return Status::OK();
 }
 
-Status TeethDetect::LoadGraph(const string& graph_file_name,
+Status TeethDetect_CPU::LoadGraph(const string& graph_file_name,
 	unique_ptr<tensorflow::Session>* session) {
 	tensorflow::GraphDef graph_def;
 	Status load_graph_status =
@@ -188,6 +194,11 @@ Status TeethDetect::LoadGraph(const string& graph_file_name,
 		return session_create_status;
 	}
 	return Status::OK();
+}
+
+extern "C" __declspec(dllexport) Teeth_Detector* getFDObj(string graph_path)
+{
+	return new TeethDetect_CPU(graph_path);
 }
 
 

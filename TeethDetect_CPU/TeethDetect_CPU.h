@@ -10,6 +10,7 @@
 #define TEETHDETECT_API __declspec(dllimport)
 #endif
 
+#include "Teeth_Detector.h"
 #include <vector>
 #include <memory>
 namespace tensorflow {
@@ -25,9 +26,9 @@ using namespace tensorflow;
 // class Status;
 
 // This class is exported from the TeethDetect.dll
-class TEETHDETECT_API TeethDetect {
+class TEETHDETECT_API TeethDetect_CPU :public Teeth_Detector {
 public:
-	TeethDetect(string graph_path);
+	TeethDetect_CPU(string graph_path);
 	// TODO: add your methods here.
 	int detect(string image_path, int& num_box, float** coord,int& width, int& height);
 private:
@@ -38,7 +39,7 @@ private:
 		vector<Tensor>* out_tensors);
 
 	Status ReadEntireFile(Env* env, const string& filename, Tensor* output);
-	Status TeethDetect::LoadGraph(const string& graph_file_name,
+	Status TeethDetect_CPU::LoadGraph(const string& graph_file_name,
 		unique_ptr<tensorflow::Session>* session);
 
 };

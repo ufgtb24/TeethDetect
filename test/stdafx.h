@@ -6,10 +6,13 @@
 #pragma once
 
 #include "targetver.h"
+// #include "TeethDetect_CPU.h"
+// #include "TeethDetect_GPU.h"
 
 #include <stdio.h>
 #include <tchar.h>
-#include "TeethDetect.h"
+#include "Teeth_Detector.h"
+# include <windows.h>
 #include <iostream>
 using namespace std;
 
