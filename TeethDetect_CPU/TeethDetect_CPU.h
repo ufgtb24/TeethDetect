@@ -30,9 +30,9 @@ class TEETHDETECT_API TeethDetect_CPU :public Teeth_Detector {
 public:
 	TeethDetect_CPU(string graph_path);
 	// TODO: add your methods here.
-	int detect(string image_path, int& num_box, float** coord,int& width, int& height);
+	int detect(const char* image_path, int& num_box, float** coord,int& width, int& height);
 private:
-	unique_ptr<Session> session;
+	unique_ptr<Session> session_detect;
 
 	Status ReadTensorFromImageFile(const string& file_name, const int input_height,
 		const int input_width, const float input_std,

@@ -9,7 +9,7 @@
 // see TeethDetect.h for the class definition
 TeethDetect_CPU::TeethDetect_CPU(string graph_path)
 {
-	Status load_graph_status = LoadGraph(graph_path, &session);
+	Status load_graph_status = LoadGraph(graph_path, &session_detect);
 	if (!load_graph_status.ok()) {
 		LOG(ERROR) << "!!!!!!!!!!!!!!!\n";
 		LOG(ERROR) << load_graph_status;
@@ -19,7 +19,7 @@ TeethDetect_CPU::TeethDetect_CPU(string graph_path)
     return;
 }
 
-int TeethDetect_CPU::detect(string image_path, int& num_box, float** coord, int& width, int& height)
+int TeethDetect_CPU::detect(const char* image_path, int& num_box, float** coord, int& width, int& height)
 {
 	string input_layer = "input";
 	string output_layer = "output_node";
@@ -53,7 +53,7 @@ int TeethDetect_CPU::detect(string image_path, int& num_box, float** coord, int&
 	height= ori_size_value(1);
 	// Actually run the image through the model.
 	std::vector<Tensor> outputs;
-	Status run_status = session->Run({ 
+	Status run_status = session_detect->Run({ 
 		{ input_layer, resized_tensor },{ "phase", is_training },{ "image_shape",image_shape } },
 	{ output_layer }, {}, &outputs);
 
@@ -196,7 +196,7 @@ Status TeethDetect_CPU::LoadGraph(const string& graph_file_name,
 	return Status::OK();
 }
 
-extern "C" __declspec(dllexport) Teeth_Detector* getFDObj(string graph_path)
+extern "C" __declspec(dllexport) Teeth_Detector* getObj(char* graph_path)
 {
 	return new TeethDetect_CPU(graph_path);
 }

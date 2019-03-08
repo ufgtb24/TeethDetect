@@ -9,28 +9,33 @@
 // see TeethDetect.h for the class definition
 TeethDetect_GPU::TeethDetect_GPU(string graph_path)
 {
-	Status load_graph_status = LoadGraph(graph_path, &session);
+	Status load_graph_status = LoadGraph(graph_path, &session_detect);
 	if (!load_graph_status.ok()) {
-		LOG(ERROR) << "!!!!!!!!!!!!!!!\n";
+		LOG(ERROR) << "\n!!!!!load_graph_status!!!!!\n";
 		LOG(ERROR) << load_graph_status;
 		LOG(ERROR) << "!!!!!!!!!!!!!!!\n";
 
 	}
 
+	Status build_read_status = Construct_Read(&session_read, 416, 416, 255);
+	if (!build_read_status.ok()) {
+		LOG(ERROR) << "\n!!!!!build_read_status!!!!!\n";
+		LOG(ERROR) << build_read_status;
+		LOG(ERROR) << "!!!!!!!!!!!!!!!\n";
+	}
+
     return;
 }
 
-int TeethDetect_GPU::detect(string image_path, int& num_box, float** coord, int& width, int& height)
+int TeethDetect_GPU::detect(const char* image_path, int& num_box, float** coord, int& width, int& height)
 {
 	string input_layer = "input";
 	string output_layer = "output_node";
 	std::vector<Tensor> resized_tensors;
 	Status read_tensor_status =
-		ReadTensorFromImageFile(image_path, 416, 416,
-			255, &resized_tensors);
+		ReadTensorFromImageFile(image_path,&resized_tensors);
 	if (!read_tensor_status.ok()) {
 		LOG(ERROR) << "!!!!!!!!!!!!!!!\n";
-
 		LOG(ERROR) << read_tensor_status;
 		LOG(ERROR) << "!!!!!!!!!!!!!!!\n";
 
@@ -56,7 +61,7 @@ int TeethDetect_GPU::detect(string image_path, int& num_box, float** coord, int&
 	height= ori_size_value(1);
 	// Actually run the image through the model.
 	std::vector<Tensor> outputs;
-	Status run_status = session->Run({ 
+	Status run_status = session_detect->Run({ 
 		{ input_layer, resized_tensor },{ "phase", is_training },{ "image_shape",image_shape } },
 	{ output_layer }, {}, &outputs);
 
@@ -73,7 +78,7 @@ int TeethDetect_GPU::detect(string image_path, int& num_box, float** coord, int&
 		auto output_detection_boxes = outputs[0].tensor<float, 2>();
 
 		for (int i = 0; i < num_box; i++) {
-			for (int j = 0; j < 4; j++) {
+			for (int j = 0; j < 7; j++) {
 				coord[i][j] = output_detection_boxes(i,j);
 // 				cout << coord[i][j] << "\t";
 			}
@@ -83,51 +88,21 @@ int TeethDetect_GPU::detect(string image_path, int& num_box, float** coord, int&
 	}
 }
 
-Status TeethDetect_GPU::ReadTensorFromImageFile(const string& file_name, const int input_height,
-	const int input_width, const float input_std,std::vector<Tensor>* out_tensors) {
+Status TeethDetect_GPU::Construct_Read(unique_ptr<tensorflow::Session>* session,
+	const int input_height,
+	const int input_width,
+	const float input_std) {
 	auto root = tensorflow::Scope::NewRootScope();
 	using namespace ::tensorflow::ops;  // NOLINT(build/namespaces)
 
-	string input_name = "file_reader";
-	string output_name = "normalized";
-
-	// read file_name into a tensor named input
-	Tensor input(tensorflow::DT_STRING, tensorflow::TensorShape());
-	TF_RETURN_IF_ERROR(
-		ReadEntireFile(tensorflow::Env::Default(), file_name, &input));
-
-	// use a placeholder to read input data
 	auto file_reader =
 		Placeholder(root.WithOpName("input"), tensorflow::DataType::DT_STRING);
 
-	std::vector<std::pair<string, tensorflow::Tensor>> inputs = {
-		{ "input", input },
-	};
-	// Now try to figure out what kind of file it is and decode it.
 	const int wanted_channels = 3;
 	tensorflow::Output image_reader;
-	if (tensorflow::StringPiece(file_name).ends_with(".png")) {
-		image_reader = DecodePng(root.WithOpName("png_reader"), file_reader,
-			DecodePng::Channels(wanted_channels));
-	}
-	else if (tensorflow::StringPiece(file_name).ends_with(".gif")) {
-		// gif decoder returns 4-D tensor, remove the first dim
-		image_reader =
-			Squeeze(root.WithOpName("squeeze_first_dim"),
-				DecodeGif(root.WithOpName("gif_reader"), file_reader));
-	}
-	else if (tensorflow::StringPiece(file_name).ends_with(".bmp")) {
-		image_reader = DecodeBmp(root.WithOpName("bmp_reader"), file_reader);
-	}
-	else {
-		// Assume if it's neither a PNG nor a GIF then it must be a JPEG.
-		image_reader = DecodeJpeg(root.WithOpName("jpeg_reader"), file_reader,
-			DecodeJpeg::Channels(wanted_channels));
-	}
-
-
-
-
+	
+	image_reader = DecodePng(root.WithOpName("png_reader"), file_reader,
+		DecodePng::Channels(wanted_channels));
 	auto get_shape = Shape(root.WithOpName("get_shape"), image_reader);
 
 	// Now cast the image data to float so we can do normal math on it.
@@ -144,7 +119,7 @@ Status TeethDetect_GPU::ReadTensorFromImageFile(const string& file_name, const i
 		root, dims_expander,
 		Const(root.WithOpName("size"), { input_height, input_width }));
 	// Subtract the mean and divide by the scale.
-	Div(root.WithOpName(output_name), resized,{ input_std });
+	Div(root.WithOpName("normalized"), resized, { input_std });
 
 	// This runs the GraphDef network definition that we've just constructed, and
 	// returns the results in the output tensor.
@@ -152,13 +127,42 @@ Status TeethDetect_GPU::ReadTensorFromImageFile(const string& file_name, const i
 
 	TF_RETURN_IF_ERROR(root.ToGraphDef(&graph));
 
+	SessionOptions session_options;
+	_putenv("CUDA_VISIBLE_DEVICES=""");
 
-	std::unique_ptr<tensorflow::Session> session(
-		tensorflow::NewSession(tensorflow::SessionOptions()));
-	TF_RETURN_IF_ERROR(session->Create(graph));
-	TF_RETURN_IF_ERROR(session->Run({ inputs }, { output_name,"get_shape" }, {}, out_tensors));
+	session_options.config.mutable_gpu_options()->set_allow_growth(true);
+
+	// 	session->reset(tensorflow::NewSession(session_options));
+	session->reset(tensorflow::NewSession(session_options));
+
+	Status session_create_status = (*session)->Create(graph);
+	if (!session_create_status.ok()) {
+		return session_create_status;
+	}
+	return Status::OK();
+
+
+}
+
+Status TeethDetect_GPU::ReadTensorFromImageFile(const string& file_name, std::vector<Tensor>* out_tensors) {
+	auto root = tensorflow::Scope::NewRootScope();
+	using namespace ::tensorflow::ops;  // NOLINT(build/namespaces)
+
+	// read file_name into a tensor named input
+	Tensor input(tensorflow::DT_STRING, tensorflow::TensorShape());
+	TF_RETURN_IF_ERROR(
+		ReadEntireFile(tensorflow::Env::Default(), file_name, &input));
+
+
+	std::vector<std::pair<string, tensorflow::Tensor>> inputs = {
+		{ "input", input },
+	};
+
+	TF_RETURN_IF_ERROR(session_read->Run({ inputs }, { "normalized","get_shape" }, {}, out_tensors));
+	// 	session->Close();
 	return Status::OK();
 }
+
 
 Status TeethDetect_GPU::ReadEntireFile(tensorflow::Env* env, const string& filename,
 	Tensor* output) {
@@ -191,7 +195,13 @@ Status TeethDetect_GPU::LoadGraph(const string& graph_file_name,
 		return tensorflow::errors::NotFound("Failed to load compute graph at '",
 			graph_file_name, "'");
 	}
-	session->reset(tensorflow::NewSession(tensorflow::SessionOptions()));
+	SessionOptions session_options;
+	_putenv("CUDA_VISIBLE_DEVICES=""");
+	session_options.config.mutable_gpu_options()->set_allow_growth(true);
+
+// 	session->reset(tensorflow::NewSession(session_options));
+	session->reset(tensorflow::NewSession(session_options));
+
 	Status session_create_status = (*session)->Create(graph_def);
 	if (!session_create_status.ok()) {
 		return session_create_status;
@@ -200,7 +210,7 @@ Status TeethDetect_GPU::LoadGraph(const string& graph_file_name,
 }
 
 
-extern "C" __declspec(dllexport) Teeth_Detector* getFDObj(string graph_path)
+extern "C" __declspec(dllexport) Teeth_Detector* getObj(char* graph_path)
 {
 	return new TeethDetect_GPU(graph_path);
 }

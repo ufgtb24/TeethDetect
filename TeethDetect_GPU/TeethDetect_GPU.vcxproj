@@ -134,6 +134,7 @@
       <PreprocessorDefinitions>NDEBUG;_WINDOWS;_USRDLL;TEETHDETECT_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>E:\TensorFlowCplusplus\tensorflow;E:\TensorFlowCplusplus\tensorflow\tensorflow\contrib\cmake\build;E:\TensorFlowCplusplus\tensorflow\tensorflow\core\kernels;E:\TensorFlowCplusplus\tensorflow\tensorflow\contrib\cmake\build\protobuf\src\protobuf\src;E:\TensorFlowCplusplus\tensorflow\tensorflow\contrib\cmake\build\external\eigen_archive;E:\TensorFlowCplusplus\tensorflow\third_party\eigen3;E:\TensorFlowCplusplus\tensorflow\tensorflow\contrib\cmake\build\external\nsync\public;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

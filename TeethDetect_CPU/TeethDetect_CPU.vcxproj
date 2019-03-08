@@ -136,6 +136,7 @@
       <AdditionalIncludeDirectories>E:\TensorFlowCplusplus\tensorflow;E:\TensorFlowCplusplus\tensorflow\tensorflow\contrib\cmake\build;E:\TensorFlowCplusplus\tensorflow\tensorflow\core\kernels;E:\TensorFlowCplusplus\tensorflow\tensorflow\contrib\cmake\build\protobuf\src\protobuf\src;E:\TensorFlowCplusplus\tensorflow\tensorflow\contrib\cmake\build\external\eigen_archive;E:\TensorFlowCplusplus\tensorflow\third_party\eigen3;E:\TensorFlowCplusplus\tensorflow\tensorflow\contrib\cmake\build\external\nsync\public;$(SolutionDir)\TeethDetect_GPU;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>
  %(AdditionalOptions)</AdditionalOptions>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
