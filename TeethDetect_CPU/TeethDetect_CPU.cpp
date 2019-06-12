@@ -70,7 +70,7 @@ int TeethDetect_CPU::detect(const char* image_path, int& num_box, float** coord,
 		auto output_detection_boxes = outputs[0].tensor<float, 2>();
 
 		for (int i = 0; i < num_box; i++) {
-			for (int j = 0; j < 4; j++) {
+			for (int j = 0; j < 7; j++) {
 				coord[i][j] = output_detection_boxes(i,j);
 // 				cout << coord[i][j] << "\t";
 			}

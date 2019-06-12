@@ -23,7 +23,7 @@ Teeth_Detector* get_TD_Obj(char* graph_path,LPCSTR dllpath
 
 int main()
 {
-	char* dllpath = "TeethDetect_GPU.dll";
+	char* dllpath = "TeethDetect_CPU.dll";
 	cout << dllpath;
 	Teeth_Detector* td = get_TD_Obj(
 		"E:/TensorFlowCplusplus/TeethDetect/x64/Release/output_graph.pb", dllpath);
@@ -35,7 +35,7 @@ int main()
 	}
 	for (int i = 0; i < 2; i++)
 	{
-		td->detect("E:/TensorFlowCplusplus/TeethDetect/x64/Release/up.png", num, coord, w, h);
+		td->detect("E:/TensorFlowCplusplus/TeethDetect/x64/Release/low.png", num, coord, w, h);
 		cout << "num = " << num << endl;
 		for (int i = 0; i < num; ++i) {
 			for (int j = 0; j < 7; ++j)
