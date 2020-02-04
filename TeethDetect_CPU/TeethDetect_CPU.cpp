@@ -38,7 +38,6 @@ int TeethDetect_CPU::detect(const char* image_path, int& num_box, float** coord,
 	const Tensor& resized_tensor = resized_tensors[0];
 	const Tensor& ori_size = resized_tensors[1];
 	auto ori_size_value = ori_size.tensor<int, 1>();
-	cout <<"ori_size: "<< ori_size_value(0) << "   " << ori_size_value(1) << endl;
 
 	// define feed value for phase
 	Tensor is_training(DT_BOOL, TensorShape());

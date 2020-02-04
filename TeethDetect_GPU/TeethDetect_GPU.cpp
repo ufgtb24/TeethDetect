@@ -23,7 +23,6 @@ TeethDetect_GPU::TeethDetect_GPU(string graph_path)
 		LOG(ERROR) << build_read_status;
 		LOG(ERROR) << "!!!!!!!!!!!!!!!\n";
 	}
-
     return;
 }
 
@@ -46,7 +45,6 @@ int TeethDetect_GPU::detect(const char* image_path, int& num_box, float** coord,
 	const Tensor& resized_tensor = resized_tensors[0];
 	const Tensor& ori_size = resized_tensors[1];
 	auto ori_size_value = ori_size.tensor<int, 1>();
-	cout <<"ori_size: "<< ori_size_value(0) << "   " << ori_size_value(1) << endl;
 
 	// define feed value for phase
 	Tensor is_training(DT_BOOL, TensorShape());
@@ -86,12 +84,15 @@ int TeethDetect_GPU::detect(const char* image_path, int& num_box, float** coord,
 		}
 
 	}
+	cout << "detect end\n";
+
 }
 
 Status TeethDetect_GPU::Construct_Read(unique_ptr<tensorflow::Session>* session,
 	const int input_height,
 	const int input_width,
 	const float input_std) {
+
 	auto root = tensorflow::Scope::NewRootScope();
 	using namespace ::tensorflow::ops;  // NOLINT(build/namespaces)
 
@@ -139,6 +140,7 @@ Status TeethDetect_GPU::Construct_Read(unique_ptr<tensorflow::Session>* session,
 	if (!session_create_status.ok()) {
 		return session_create_status;
 	}
+
 	return Status::OK();
 
 
@@ -199,13 +201,13 @@ Status TeethDetect_GPU::LoadGraph(const string& graph_file_name,
 	_putenv("CUDA_VISIBLE_DEVICES=""");
 	session_options.config.mutable_gpu_options()->set_allow_growth(true);
 
-// 	session->reset(tensorflow::NewSession(session_options));
 	session->reset(tensorflow::NewSession(session_options));
 
 	Status session_create_status = (*session)->Create(graph_def);
 	if (!session_create_status.ok()) {
 		return session_create_status;
 	}
+
 	return Status::OK();
 }
 

@@ -2,6 +2,7 @@
 //
 
 #include "stdafx.h"
+#include <time.h>
 
 
 Teeth_Detector* get_TD_Obj(char* graph_path,LPCSTR dllpath
@@ -25,27 +26,38 @@ int main()
 {
 	char* dllpath = "TeethDetect_GPU.dll";
 	cout << dllpath;
-	Teeth_Detector* td = get_TD_Obj(
-		"E:/TensorFlowCplusplus/TeethDetect/x64/Release/output_graph.pb", dllpath);
 
 	int num,w,h;
 	float** coord = new float*[16];
 	for (int i = 0; i < 16; i++) {
 		coord[i] = new float[7];
 	}
-	for (int i = 0; i < 2; i++)
-	{
-		td->detect("E:/TensorFlowCplusplus/TeethDetect/x64/Release/low.png", num, coord, w, h);
-		cout << "num = " << num << endl;
-		for (int i = 0; i < num; ++i) {
-			for (int j = 0; j < 7; ++j)
-				cout << coord[i][j] << "\t";
-			std::cout << std::endl;
-		}
+	clock_t  start, stop;
+	start = clock();
 
-// 		getchar();
+	Teeth_Detector* td = get_TD_Obj(
+		"E:/TensorFlowCplusplus/TeethDetect/x64/Release/output_graph.pb", dllpath);
+	stop = clock();
+	cout <<"init time: "<< stop - start << endl;
+
+	for (int i = 0; i < 5; i++)
+	{
+		clock_t  start, stop;
+		start = clock();
+		cout << i << endl;
+		td->detect("E:/TensorFlowCplusplus/TeethDetect/x64/Release/low.png", num, coord, w, h);
+		stop = clock();
+		cout <<"once time: "<<stop - start <<"\n\n";
+
+		//cout << "num = " << num << endl;
+		//for (int i = 0; i < num; ++i) {
+		//	for (int j = 0; j < 7; ++j)
+		//		cout << coord[i][j] << "\t";
+		//	std::cout << std::endl;
+		//}
+
 	}
-	getchar();
+
 
 		return 0;
 }

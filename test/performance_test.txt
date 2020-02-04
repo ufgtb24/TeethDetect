@@ -1,0 +1,54 @@
+cpu============================
+init time: 358
+0
+num_box = 13
+detect end
+once time: 7572
+
+1
+num_box = 13
+detect end
+once time: 415
+
+2
+num_box = 13
+detect end
+once time: 416
+
+3
+num_box = 13
+detect end
+once time: 416
+
+4
+num_box = 13
+detect end
+once time: 419
+=======================================================
+gpu====================================================
+init time: 1021
+0
+2020-02-04 16:01:18.338660: I tensorflow/stream_executor/dso_loader.cc:152] successfully opened CUDA library cublas64_100.dll locally
+num_box = 13
+detect end
+once time: 8033
+
+1
+num_box = 13
+detect end
+once time: 40
+
+2
+num_box = 13
+detect end
+once time: 42
+
+3
+num_box = 13
+detect end
+once time: 41
+
+4
+num_box = 13
+detect end
+once time: 41
