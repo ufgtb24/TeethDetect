@@ -182,7 +182,9 @@ Status TeethDetect_GPU::ReadEntireFile(tensorflow::Env* env, const string& filen
 			"' expected ", file_size, " got ",
 			data.size());
 	}
-	output->scalar<string>()() = string (data);
+	//output->scalar<string>()() = string (data);
+	output->scalar<string>()() = data.ToString();
+
 	return Status::OK();
 }
 
