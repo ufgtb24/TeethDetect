@@ -1,15 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29503.13
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "test_tensorflow_c", "test_tensorflow_c\test_tensorflow_c.vcxproj", "{82910557-FAA8-471E-87B0-1E78B611D8A7}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "test", "test\test.vcxproj", "{459014C4-2D57-49F0-AC96-484D17D74F13}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TeethDetect_CPU", "TeethDetect_CPU\TeethDetect_CPU.vcxproj", "{CCD6502F-AA9C-4301-9535-5B2F3A764F97}"
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TeethDetect_GPU", "TeethDetect_GPU\TeethDetect_GPU.vcxproj", "{FF444CDE-666F-449F-8F54-C2F9546240DA}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TeethDetect", "TeethDetect\TeethDetect_GPU.vcxproj", "{FF444CDE-666F-449F-8F54-C2F9546240DA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -35,14 +33,6 @@ Global
 		{459014C4-2D57-49F0-AC96-484D17D74F13}.Release|x64.Build.0 = Release|x64
 		{459014C4-2D57-49F0-AC96-484D17D74F13}.Release|x86.ActiveCfg = Release|Win32
 		{459014C4-2D57-49F0-AC96-484D17D74F13}.Release|x86.Build.0 = Release|Win32
-		{CCD6502F-AA9C-4301-9535-5B2F3A764F97}.Debug|x64.ActiveCfg = Debug|x64
-		{CCD6502F-AA9C-4301-9535-5B2F3A764F97}.Debug|x64.Build.0 = Debug|x64
-		{CCD6502F-AA9C-4301-9535-5B2F3A764F97}.Debug|x86.ActiveCfg = Debug|Win32
-		{CCD6502F-AA9C-4301-9535-5B2F3A764F97}.Debug|x86.Build.0 = Debug|Win32
-		{CCD6502F-AA9C-4301-9535-5B2F3A764F97}.Release|x64.ActiveCfg = Release|x64
-		{CCD6502F-AA9C-4301-9535-5B2F3A764F97}.Release|x64.Build.0 = Release|x64
-		{CCD6502F-AA9C-4301-9535-5B2F3A764F97}.Release|x86.ActiveCfg = Release|Win32
-		{CCD6502F-AA9C-4301-9535-5B2F3A764F97}.Release|x86.Build.0 = Release|Win32
 		{FF444CDE-666F-449F-8F54-C2F9546240DA}.Debug|x64.ActiveCfg = Debug|x64
 		{FF444CDE-666F-449F-8F54-C2F9546240DA}.Debug|x64.Build.0 = Debug|x64
 		{FF444CDE-666F-449F-8F54-C2F9546240DA}.Debug|x86.ActiveCfg = Debug|Win32
@@ -54,5 +44,8 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {456947A0-0190-4A02-835E-BBA0E16B8936}
 	EndGlobalSection
 EndGlobal

@@ -133,7 +133,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(SolutionDir)\TeethDetect_GPU;$(SolutionDir)\TeethDetect_CPU</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\TeethDetect;$(SolutionDir)\TeethDetect_CPU</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -141,7 +141,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>E:\TensorFlowCplusplus\TeethDetect\x64\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>TeethDetect_GPU.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>TeethDetect.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -162,10 +162,7 @@
     <ClCompile Include="test.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\TeethDetect_CPU\TeethDetect_CPU.vcxproj">
-      <Project>{ccd6502f-aa9c-4301-9535-5b2f3a764f97}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\TeethDetect_GPU\TeethDetect_GPU.vcxproj">
+    <ProjectReference Include="..\TeethDetect\TeethDetect_GPU.vcxproj">
       <Project>{ff444cde-666f-449f-8f54-c2f9546240da}</Project>
     </ProjectReference>
   </ItemGroup>

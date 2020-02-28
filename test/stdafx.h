@@ -11,7 +11,6 @@
 
 #include <stdio.h>
 #include <tchar.h>
-#include "Teeth_Detector.h"
 # include <windows.h>
 #include <iostream>
 using namespace std;

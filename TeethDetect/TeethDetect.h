@@ -9,8 +9,7 @@
 #else
 #define TEETHDETECT_API __declspec(dllimport)
 #endif
-
-#include "Teeth_Detector.h"
+#include <string>
 #include <vector>
 #include <memory>
 
@@ -27,9 +26,9 @@ using namespace tensorflow;
 // class Status;
 
 // This class is exported from the TeethDetect.dll
-class TEETHDETECT_API TeethDetect_GPU:public Teeth_Detector {
+class TEETHDETECT_API TeethDetector{
 public:
-	TeethDetect_GPU(string graph_path);
+	TeethDetector(string graph_path);
 	// TODO: add your methods here.
 	int detect(const char* image_path, int& num_box, float** coord,int& width, int& height);
 private:

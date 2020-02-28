@@ -7,7 +7,7 @@
 
 // This is the constructor of a class that has been exported.
 // see TeethDetect.h for the class definition
-TeethDetect_GPU::TeethDetect_GPU(string graph_path)
+TeethDetector::TeethDetector(string graph_path)
 {
 	Status load_graph_status = LoadGraph(graph_path, &session_detect);
 	if (!load_graph_status.ok()) {
@@ -26,7 +26,7 @@ TeethDetect_GPU::TeethDetect_GPU(string graph_path)
     return;
 }
 
-int TeethDetect_GPU::detect(const char* image_path, int& num_box, float** coord, int& width, int& height)
+int TeethDetector::detect(const char* image_path, int& num_box, float** coord, int& width, int& height)
 {
 	string input_layer = "input";
 	string output_layer = "output_node";
@@ -88,7 +88,7 @@ int TeethDetect_GPU::detect(const char* image_path, int& num_box, float** coord,
 
 }
 
-Status TeethDetect_GPU::Construct_Read(unique_ptr<tensorflow::Session>* session,
+Status TeethDetector::Construct_Read(unique_ptr<tensorflow::Session>* session,
 	const int input_height,
 	const int input_width,
 	const float input_std) {
@@ -146,7 +146,7 @@ Status TeethDetect_GPU::Construct_Read(unique_ptr<tensorflow::Session>* session,
 
 }
 
-Status TeethDetect_GPU::ReadTensorFromImageFile(const string& file_name, std::vector<Tensor>* out_tensors) {
+Status TeethDetector::ReadTensorFromImageFile(const string& file_name, std::vector<Tensor>* out_tensors) {
 	auto root = tensorflow::Scope::NewRootScope();
 	using namespace ::tensorflow::ops;  // NOLINT(build/namespaces)
 
@@ -166,7 +166,7 @@ Status TeethDetect_GPU::ReadTensorFromImageFile(const string& file_name, std::ve
 }
 
 
-Status TeethDetect_GPU::ReadEntireFile(tensorflow::Env* env, const string& filename,
+Status TeethDetector::ReadEntireFile(tensorflow::Env* env, const string& filename,
 	Tensor* output) {
 	tensorflow::uint64 file_size = 0;
 	TF_RETURN_IF_ERROR(env->GetFileSize(filename, &file_size));
@@ -188,7 +188,7 @@ Status TeethDetect_GPU::ReadEntireFile(tensorflow::Env* env, const string& filen
 	return Status::OK();
 }
 
-Status TeethDetect_GPU::LoadGraph(const string& graph_file_name,
+Status TeethDetector::LoadGraph(const string& graph_file_name,
 	unique_ptr<tensorflow::Session>* session) {
 	tensorflow::GraphDef graph_def;
 	Status load_graph_status =
@@ -211,10 +211,5 @@ Status TeethDetect_GPU::LoadGraph(const string& graph_file_name,
 	return Status::OK();
 }
 
-
-extern "C" __declspec(dllexport) Teeth_Detector* getObj(char* graph_path)
-{
-	return new TeethDetect_GPU(graph_path);
-}
 
 

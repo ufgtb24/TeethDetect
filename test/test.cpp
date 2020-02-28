@@ -3,29 +3,12 @@
 
 #include "stdafx.h"
 #include <time.h>
+#include "TeethDetect.h"
 
-
-Teeth_Detector* get_TD_Obj(char* graph_path,LPCSTR dllpath
-) {
-
-	typedef Teeth_Detector*(*loadFun)(char* graph_path); //宏定义函数指针类型
-	HINSTANCE hDll; //DLL句柄 
-	cout <<"\n inside  :  "<< dllpath<<endl;
-	hDll = LoadLibrary(dllpath);
-
-	if (hDll == NULL) {
-		int dwError = GetLastError();
-		cout << "load failed \n" << dwError;
-	}
-	loadFun getObj = (loadFun)GetProcAddress(hDll, "getObj");
-	return getObj(graph_path);
-}
 
 
 int main()
 {
-	char* dllpath = "TeethDetect_GPU.dll";
-	cout << dllpath;
 
 	int num,w,h;
 	float** coord = new float*[16];
@@ -35,8 +18,8 @@ int main()
 	clock_t  start, stop;
 	start = clock();
 
-	Teeth_Detector* td = get_TD_Obj(
-		"E:/TensorFlowCplusplus/TeethDetect/x64/Release/output_graph.pb", dllpath);
+	TeethDetector* td = new TeethDetector(
+		"E:/TensorFlowCplusplus/TeethDetect/x64/Release/output_graph.pb");
 	stop = clock();
 	cout <<"init time: "<< stop - start << endl;
 
